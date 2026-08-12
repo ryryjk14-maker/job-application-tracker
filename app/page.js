@@ -50,9 +50,14 @@ export default async function DashboardPage() {
     <>
       <div className="header">
         <h1>Job Application Tracker</h1>
-        <Link className="btn" href="/new">
-          + Add Application
-        </Link>
+        <div className="actions" style={{ marginTop: 0 }}>
+          <Link className="btn secondary" href="/insights">
+            Job Search Insights
+          </Link>
+          <Link className="btn" href="/new">
+            + Add Application
+          </Link>
+        </div>
       </div>
 
       <p className="counts">
