@@ -22,6 +22,7 @@ export default function ApplicationDetail({ application }) {
 
   const [saving, setSaving] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [reopening, setReopening] = useState(false);
   const [recommending, setRecommending] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
@@ -77,6 +78,24 @@ export default function ApplicationDetail({ application }) {
     } catch (err) {
       setError(err.message);
       setClosing(false);
+    }
+  }
+
+  // Undoes an accidental close. Only the reopen flag is sent, so nothing else
+  // on the record is touched — any unsaved edits in the form above are left
+  // for "Save Changes" to apply.
+  async function handleReopen() {
+    setReopening(true);
+    setError(null);
+    setMessage(null);
+    try {
+      await patch({ reopen: true });
+      setMessage('Application reopened.');
+      router.refresh();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setReopening(false);
     }
   }
 
@@ -166,7 +185,7 @@ export default function ApplicationDetail({ application }) {
               {recommending ? 'Asking Claude…' : 'Recommend Next Action'}
             </button>
 
-            {application.is_active && (
+            {application.is_active ? (
               <button
                 className="btn danger"
                 type="button"
@@ -174,6 +193,15 @@ export default function ApplicationDetail({ application }) {
                 disabled={closing}
               >
                 {closing ? 'Closing…' : 'Close Application'}
+              </button>
+            ) : (
+              <button
+                className="btn secondary"
+                type="button"
+                onClick={handleReopen}
+                disabled={reopening}
+              >
+                {reopening ? 'Reopening…' : 'Reopen Application'}
               </button>
             )}
           </div>

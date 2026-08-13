@@ -25,6 +25,13 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
   }
 
+  if (body.close === true && body.reopen === true) {
+    return NextResponse.json(
+      { error: 'An application cannot be closed and reopened in the same request.' },
+      { status: 400 }
+    );
+  }
+
   const updates = { updated_at: new Date().toISOString() };
 
   if ('status' in body) {
@@ -55,6 +62,14 @@ export async function PATCH(request, { params }) {
   if (body.close === true) {
     updates.is_active = false;
     updates.needs_attention = false;
+  }
+
+  // Reopening only puts the record back on the active list. Status, dates,
+  // notes, and the stored recommendation are left exactly as they were, so an
+  // accidental close can be undone without losing anything. The daily
+  // attention check re-evaluates needs_attention on its next run.
+  if (body.reopen === true) {
+    updates.is_active = true;
   }
 
   const { data, error } = await getSupabase()
